@@ -32,7 +32,6 @@ class plot_object:
         plt.plot(vel_arrow_array[:, 0], vel_arrow_array[:, 1], label = angle_label)
 
 if __name__ == "__main__":
-    print("Testing_reupload_to_github")
     with open("airfoils.json", 'r') as json_handle:
         input_vals = json.load(json_handle)
     
