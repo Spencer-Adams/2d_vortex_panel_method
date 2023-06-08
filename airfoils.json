@@ -9,5 +9,5 @@
                "NACA_2612_100.txt",
                "NACA_2406_100.txt",
                "NACA_2418_100.txt"],
-   "alpha[deg]": 10.0  
+   "alpha[deg]": 5.0  
 }

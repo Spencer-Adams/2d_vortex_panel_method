@@ -35,83 +35,50 @@ if __name__ == "__main__":
     with open("airfoils.json", 'r') as json_handle:
         input_vals = json.load(json_handle)
     
-    # Extract the NACA airfoil paths
-    NACA_2412_200_file = input_vals['airfoils'][0]
-    NACA_0012_100_file = input_vals['airfoils'][1]
-    NACA_2512_100_file = input_vals['airfoils'][2]
-    NACA_4512_100_file = input_vals['airfoils'][3]
-    NACA_6512_100_file = input_vals['airfoils'][4]
-    NACA_2212_100_file = input_vals['airfoils'][5]
-    NACA_2412_100_file = input_vals['airfoils'][6]
-    NACA_2612_100_file = input_vals['airfoils'][7]
-    NACA_2406_100_file = input_vals['airfoils'][8]
-    NACA_2418_100_file = input_vals['airfoils'][9]
+    NACA_list = []
+    for m in range(len(input_vals['airfoils'])): # Here you are filling 
+        naca = input_vals['airfoils'][m] # naca is each type of airfoil in the 'airfoils' section of the json file
+        NACA_list.append(naca)
 
+    #############################################################################
+    #  ADD TO THE END OF NACA_list BELOW IF YOU ADD ANY AIRFOILS IN THE JSON    #
+    #############################################################################  
 
+    NACA_vals = [] # this is a list that is filled with the txt file values for each airfoil. 
     alpha = (input_vals["alpha[deg]"])*math.pi/180
 
     # Read in the text file points
-    with open(NACA_2412_200_file, 'r') as text_handle:
-        NACA_2412_200_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_0012_100_file, 'r') as text_handle:
-        NACA_0012_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_2512_100_file, 'r') as text_handle:
-        NACA_2512_100_points = [list(map(float, line.strip().split())) for line in text_handle]
+    for i in range(len(NACA_list)):
+        with open(NACA_list[i], 'r') as text_handle:
+            NACA_val = [list(map(float, line.strip().split())) for line in text_handle]
+            NACA_vals.append(NACA_val) # this is how NACA_vals is being filled. It's being filled like this NACA_vals = [......,.......,......]
     
-    with open(NACA_4512_100_file, 'r') as text_handle:
-        NACA_4512_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_6512_100_file, 'r') as text_handle:
-        NACA_6512_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-    
-    with open(NACA_2212_100_file, 'r') as text_handle:
-        NACA_2212_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_2412_100_file, 'r') as text_handle:
-        NACA_2412_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_2612_100_file, 'r') as text_handle:
-        NACA_2612_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_2406_100_file, 'r') as text_handle:
-        NACA_2406_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
-    with open(NACA_2418_100_file, 'r') as text_handle:
-        NACA_2418_100_points = [list(map(float, line.strip().split())) for line in text_handle]
-
     x_leading_edge = 0
     x_trailing_edge = 1
     step_size = 0.01
     angle_label = str(alpha*180/math.pi) + " [deg]"
 
-    my_NACA_2412_200 = plot_object(NACA_2412_200_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_0012_100 = plot_object(NACA_0012_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_2512_100 = plot_object(NACA_2512_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_4512_100 = plot_object(NACA_4512_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_6512_100 = plot_object(NACA_6512_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_2212_100 = plot_object(NACA_2212_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_2412_100 = plot_object(NACA_2412_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_2612_100 = plot_object(NACA_2612_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_2406_100 = plot_object(NACA_2406_100_points, x_leading_edge, x_trailing_edge, step_size)
-    my_NACA_2418_100 = plot_object(NACA_2418_100_points, x_leading_edge, x_trailing_edge, step_size)    
+    NACA_objects = []
 
-        #############################################################################
-        # COMMENT THE LINES BELOW IN OR OUT TO SHOW PLOTS OF THE DIFFERENT AIRFOILS #
-        #############################################################################  
+    for j in range(len(NACA_list)):
+        NACA_ob = plot_object(NACA_vals[j], x_leading_edge, x_trailing_edge, step_size)
+        NACA_objects.append(NACA_ob) 
 
-    my_NACA_2412_200.airfoil_plot("NACA_2412")
-    my_NACA_2412_200.vel_at_alpha_plot(alpha, angle_label)
-    my_NACA_0012_100.airfoil_plot("NACA_0012")
-    my_NACA_2512_100.airfoil_plot("NACA_2512")
-    my_NACA_4512_100.airfoil_plot("NACA_4512")
-    my_NACA_6512_100.airfoil_plot("NACA_6512")
-    # my_NACA_2212_100.airfoil_plot("NACA_2212")
-    # my_NACA_2412_100.airfoil_plot("NACA_2412")
-    # my_NACA_2612_100.airfoil_plot("NACA_2612")
-    # my_NACA_2406_100.airfoil_plot("NACA_2406")
-    # my_NACA_2418_100.airfoil_plot("NACA_2418")
+    #############################################################################
+    # COMMENT THE LINES BELOW IN OR OUT TO SHOW PLOTS OF THE DIFFERENT AIRFOILS #
+    #############################################################################  
+    
+    NACA_objects[0].vel_at_alpha_plot(alpha, angle_label)
+    NACA_objects[0].airfoil_plot("NACA_2412")
+    NACA_objects[1].airfoil_plot("NACA_0012")
+    NACA_objects[2].airfoil_plot("NACA_2512")
+    NACA_objects[3].airfoil_plot("NACA_4512")
+    # NACA_objects[4].airfoil_plot("NACA_6512")
+    # NACA_objects[5].airfoil_plot("NACA_2212")
+    # NACA_objects[6].airfoil_plot("NACA_2412")
+    # NACA_objects[7].airfoil_plot("NACA_2612")
+    # NACA_objects[8].airfoil_plot("NACA_2406")
+    # NACA_objects[9].airfoil_plot("NACA_2418")
 
     # for point in NACA_2412_points:
     #   x, y = point
