@@ -8,6 +8,9 @@
                "NACA_2412_100.txt",
                "NACA_2612_100.txt",
                "NACA_2406_100.txt",
-               "NACA_2418_100.txt"],
-   "alpha[deg]": 5.0  
+               "NACA_2418_100.txt",
+               "NACA_2412_10.txt"],
+   "alpha[deg]": 0.0,
+   "freestream_velocity": 10.0  
 }
+

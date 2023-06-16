@@ -63,6 +63,7 @@ if __name__ == "__main__":
     for j in range(len(NACA_list)):
         NACA_ob = plot_object(NACA_vals[j], x_leading_edge, x_trailing_edge, step_size)
         NACA_objects.append(NACA_ob) 
+        plot_object()
 
     #############################################################################
     # COMMENT THE LINES BELOW IN OR OUT TO SHOW PLOTS OF THE DIFFERENT AIRFOILS #
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     NACA_objects[0].airfoil_plot("NACA_2412")
     NACA_objects[1].airfoil_plot("NACA_0012")
     NACA_objects[2].airfoil_plot("NACA_2512")
-    NACA_objects[3].airfoil_plot("NACA_4512")
+    # NACA_objects[3].airfoil_plot("NACA_4512")
     # NACA_objects[4].airfoil_plot("NACA_6512")
     # NACA_objects[5].airfoil_plot("NACA_2212")
     # NACA_objects[6].airfoil_plot("NACA_2412")
