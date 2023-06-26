@@ -1,6 +1,5 @@
 import json
 import numpy as np
-import math
 from tabulate import tabulate
 
 np.set_printoptions(precision=15)
@@ -78,7 +77,7 @@ class vortex_panels:
         """This function calculates the p_matrix given the two rotation matrices found in the calc_a_matrix function"""
         p_matrix = (1/(2*np.pi*(L**2)))*np.matmul(mat_1,mat_2)
         return p_matrix
-
+        
     def calc_a_matrix(self):
         """This function finds the nxn a matrix given a list of nodes, control points, and correct functions that calculate xi,eta,phi,psi,li, and lj"""
         points_list = self.geometry
@@ -91,14 +90,15 @@ class vortex_panels:
             for j in range(0,n-1):              
                 l_j = self.L[j]                
                 l_i = self.L[i]
+
                 # define rotation matrix for x and y in the p_matrix calculation
                 rotate_x_y = np.array([[x[j+1]-x[j], -(y[j+1]-y[j])],[y[j+1]-y[j], x[j+1]-x[j]]])
 
-                # define rotation matrix for xi and eta in the p_matrix calculation
+                # define rotation matrix for xi and eta
                 rotate_xi_eta = self.calc_xi_eta_phi_psi(x_control[i], y_control[i], x[j+1], x[j], y[j+1], y[j], l_j)
 
                 # Calculate the P matrix at i, j
-                p_matrix = self.calc_p_matrix(rotate_x_y, rotate_xi_eta, l_j)
+                p_matrix = (1/(2*np.pi*(l_j**2)))*np.matmul(rotate_x_y, rotate_xi_eta)
 
                 a_vals[i,j] = a_vals[i,j] + ((x[i+1]-x[i])*p_matrix[1,0]-(y[i+1]-y[i])*p_matrix[0,0])/l_i
                 a_vals[i,j+1] = a_vals[i,j+1] + ((x[i+1]-x[i])*p_matrix[1,1]-(y[i+1]-y[i])*p_matrix[0,1])/l_i    
@@ -184,7 +184,6 @@ class vortex_panels:
         
 if __name__ == "__main__":
     NACA_object = vortex_panels("airfoils_abbreviated.json")
-    # NACA_object.program(3)
     NACA_object.program(0)
     NACA_object.program(1)
     NACA_object.program(2)
