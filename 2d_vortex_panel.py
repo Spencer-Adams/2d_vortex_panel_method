@@ -98,7 +98,7 @@ class vortex_panels:
                 rotate_xi_eta = self.calc_xi_eta_phi_psi(x_control[i], y_control[i], x[j+1], x[j], y[j+1], y[j], l_j)
 
                 # Calculate the P matrix at i, j
-                p_matrix = (1/(2*np.pi*(l_j**2)))*np.matmul(rotate_x_y, rotate_xi_eta)
+                p_matrix = self.calc_p_matrix(rotate_x_y, rotate_xi_eta, l_j)
 
                 a_vals[i,j] = a_vals[i,j] + ((x[i+1]-x[i])*p_matrix[1,0]-(y[i+1]-y[i])*p_matrix[0,0])/l_i
                 a_vals[i,j+1] = a_vals[i,j+1] + ((x[i+1]-x[i])*p_matrix[1,1]-(y[i+1]-y[i])*p_matrix[0,1])/l_i    
