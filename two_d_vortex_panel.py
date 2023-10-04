@@ -24,10 +24,6 @@ class vortex_panels:
         self.geometry = np.array(points)
     
     def pull_label(self, i):
-        foil = self.airfoils[i]
-        self.label = foil.replace(".txt", " ")
-    
-    def pull_label(self, i):
         with open(self.json_file, 'r') as json_handle:
             input_vals = json.load(json_handle)
             foil = input_vals['airfoils'][i]  # index 10 is for the 10 point airfoil, use for testing.
