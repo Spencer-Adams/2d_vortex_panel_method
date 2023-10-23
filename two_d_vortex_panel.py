@@ -9,6 +9,8 @@ class vortex_panels:
     def __init__(self, json_file):
         self.json_file = json_file
         self.load_json()
+        self.pull_length()
+
 
     def load_json(self):
         with open(self.json_file, 'r') as json_handle:
@@ -158,14 +160,12 @@ class vortex_panels:
     def program(self, i):
         """This is a run function that uses all of the functions above."""
         self.pull_nodes(i)
-        self.pull_length()
-        self.load_json()
         points = []
+        self.calc_L()
+        self.calc_control_points()
+        self.calc_a_matrix()
         for j in range(self.length):
-            self.pull_alpha(j)
-            self.calc_L()
-            self.calc_control_points()
-            self.calc_a_matrix()
+            self.pull_alpha(j)     
             self.calc_B_matrix()
             self.calc_gammas()
             self.calc_CL()
