@@ -1,16 +1,10 @@
 {
-   "airfoils": ["NACA_2412_200.txt",
-               "NACA_0012_100.txt",
-               "NACA_2512_100.txt",
-               "NACA_4512_100.txt",
-               "NACA_6512_100.txt",
-               "NACA_2212_100.txt",
-               "NACA_2412_100.txt",
-               "NACA_2612_100.txt",
-               "NACA_2406_100.txt",
-               "NACA_2418_100.txt",
-               "NACA_2412_10.txt"],
-   "alpha[deg]": 0.0,
-   "freestream_velocity": 10.0  
-}
-
+    "airfoils": ["NACA_2412_200.txt",
+                "NACA_2421_200.txt",
+                "NACA_0015_200.txt"
+                ],
+    "alpha[deg]": [-12.0, -10.0, -8.0, -6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0],
+    "freestream_velocity": 10.0  
+ }
+ 
+ 

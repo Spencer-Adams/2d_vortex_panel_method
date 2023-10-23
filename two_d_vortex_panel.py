@@ -4,43 +4,53 @@ from tabulate import tabulate
 
 np.set_printoptions(precision=15)
 
+
 class vortex_panels:
     """This class contains functions that calculates position of nodes, control points, li, xi, eta, phi, psi, P_matrix, A_matrix, gamma_vector, cartesian_velocity, C_p, C_L, C_mle, C_mc/4"""
     def __init__(self, json_file):
         self.json_file = json_file
         self.load_json()
-        self.pull_length()
+        self.pull_length_alpha()
 
 
     def load_json(self):
+        """This function pulls in all the input values from the json"""
         with open(self.json_file, 'r') as json_handle:
             input_vals = json.load(json_handle)
             self.airfoils = input_vals['airfoils']
             self.alpha_deg = np.radians(input_vals["alpha[deg]"])
             self.vel_inf = input_vals["freestream_velocity"]
 
+
     def pull_nodes(self, i):
+        """This function grabs the text files inside the json and turns them into arrays"""
         foil = self.airfoils[i]
         with open(foil, 'r') as text_handle:
             points = [list(map(float, line.strip().split())) for line in text_handle]
         self.geometry = np.array(points)
     
+
     def pull_label(self, i):
+        """This function finds the title of each text file to clarify the output table"""
         with open(self.json_file, 'r') as json_handle:
             input_vals = json.load(json_handle)
-            foil = input_vals['airfoils'][i]  # index 10 is for the 10 point airfoil, use for testing.
+            foil = input_vals['airfoils'][i]  
         self.label = foil
 
-    def pull_length(self):
+
+    def pull_length_alpha(self):
+        """This function p"""
         with open(self.json_file, 'r') as json_handle:
             input_vals = json.load(json_handle)
-            alpha = np.radians(input_vals["alpha[deg]"]) ## INPUT_alpha ##
+            alpha = np.radians(input_vals["alpha[deg]"]) 
             length = len(alpha)
-        self.length = length
+        self.length_alpha = length
     
+
     def pull_alpha(self, j):
         self.alpha = self.alpha_deg[j]
     
+
     def calc_control_points(self):
         """Given a list of nodes, this function calculates the control points by taking the average position of each pair adjacent nodes and returns them in a Nx2 list"""
         NACA_list = self.geometry
@@ -53,6 +63,7 @@ class vortex_panels:
         control_points_array = np.array(control_points)
         self.control_points = control_points_array
    
+
     def calc_L(self):
         """Given a list of nodes, this function calculates each value of L_j and returns them in an 1xN list"""
         points_list = self.geometry
@@ -62,6 +73,7 @@ class vortex_panels:
         L_vals = np.sqrt(diff_x**2 + diff_y**2)
         self.L = L_vals
    
+
     def calc_xi_eta_phi_psi(self, control_x, control_y, point_x_2, point_x_1, point_y_2, point_y_1, L):
         """This function calculates the xi, eta, phi, and psi values given a list of nodes and control points"""
         xi = (1/L)*((point_x_2-point_x_1)*(control_x-point_x_1)+(point_y_2-point_y_1)*(control_y-point_y_1)) # this is the dot product for solving for xi
@@ -71,11 +83,13 @@ class vortex_panels:
         rotate_xi_eta = np.array([[(L-xi)*phi+(eta*psi), (xi*phi)-(eta*psi)], [(eta*phi)-((L-xi)*psi)-L, (-eta*phi)-(xi*psi)+L]])
         return rotate_xi_eta
    
+
     def calc_p_matrix(self, mat_1, mat_2, L):
         """This function calculates the p_matrix given the two rotation matrices found in the calc_a_matrix function"""
         p_matrix = (1/(2*np.pi*(L**2)))*np.matmul(mat_1,mat_2)
         return p_matrix
         
+
     def calc_a_matrix(self):
         """This function finds the nxn a matrix given a list of nodes, control points, and correct functions that calculate xi,eta,phi,psi,li, and lj"""
         points_list = self.geometry
@@ -104,6 +118,7 @@ class vortex_panels:
         a_vals[n-1,n-1] = 1.0 
         self.A_matrix = a_vals
    
+
     def calc_B_matrix(self): # this matrix is the Nx1 matrix that's in equation 4.32 in the Aeronautics engineering handbook
         """This function finds the d_matrix given the a_matrix and vel_inf"""
         points_list = self.geometry
@@ -118,11 +133,13 @@ class vortex_panels:
             B_matrix[i] = B_val
         self.B_matrix = B_matrix
    
+
     def calc_gammas(self):
         """This function finds the gamma values given matrix_a, matrix_d and vel_inf"""
         gammas = np.linalg.solve(self.A_matrix, self.vel_inf*self.B_matrix)
         self.gammas = gammas
    
+
     def calc_CL(self):
         """This function finds CL given gammas, vel_inf, a geometry, and l_i"""
         gammas = self.gammas
@@ -136,6 +153,7 @@ class vortex_panels:
             Coeff_L += Co_L
         self.Coeff_L = Coeff_L
    
+
     def calc_Cm_le(self):
         """This function finds the moment coefficient calculated at the leading edge"""
         points_list = self.geometry
@@ -152,11 +170,13 @@ class vortex_panels:
         Cm_le = (-1/3)*Cm_le/self.vel_inf
         self.Coeff_mle = Cm_le
    
+
     def calc_Cm_4(self):
         """This function calculates the coefficient of lift at the quarter chord"""
         Cm_4 = self.Coeff_mle+ 0.25*self.Coeff_L*np.cos(self.alpha)
         self.Cm_4 = Cm_4
     
+
     def program(self, i):
         """This is a run function that uses all of the functions above."""
         self.pull_nodes(i)
@@ -164,7 +184,7 @@ class vortex_panels:
         self.calc_L()
         self.calc_control_points()
         self.calc_a_matrix()
-        for j in range(self.length):
+        for j in range(self.length_alpha):
             self.pull_alpha(j)     
             self.calc_B_matrix()
             self.calc_gammas()
@@ -179,5 +199,8 @@ class vortex_panels:
         print(tabulate(points, headers=["alpha(deg)", 'CL', "Cm_le", 'Cm_c/4']), "\n")
         
 
-
-   
+if __name__ == "__main__":
+    NACA_object = vortex_panels("airfoils.json")
+    NACA_object.program(0)
+    NACA_object.program(1)
+    NACA_object.program(2)
