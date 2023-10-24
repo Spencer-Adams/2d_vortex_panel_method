@@ -48,6 +48,7 @@ class vortex_panels:
     
 
     def pull_alpha(self, j):
+        """This allows us to solve for the coefficients at a given angle of attack."""
         self.alpha = self.alpha_deg[j]
     
 
