@@ -71,7 +71,7 @@ class vortex_panels:
         diff_x = np.diff(x)
         diff_y = np.diff(y)
         L_vals = np.sqrt(diff_x**2 + diff_y**2)
-        self.L = L_vals
+        self.L_vals = L_vals
    
 
     def calc_xi_eta_phi_psi(self, control_x, control_y, point_x_2, point_x_1, point_y_2, point_y_1, L):
@@ -82,13 +82,19 @@ class vortex_panels:
         psi = 0.5*np.log((xi**2+eta**2)/((xi-L)**2+eta**2))
         rotate_xi_eta = np.array([[(L-xi)*phi+(eta*psi), (xi*phi)-(eta*psi)], [(eta*phi)-((L-xi)*psi)-L, (-eta*phi)-(xi*psi)+L]])
         return rotate_xi_eta
-   
+    
+
+    def calc_p_first(self, x_j_plus_one, x_j, y_j_plus_one, y_j):
+        """This function calculates the first matrix of the p matrix"""
+        rotate_x_y = np.array([[x_j_plus_one-x_j, -(y_j_plus_one-y_j)],[y_j_plus_one-y_j, x_j_plus_one-x_j]])
+        return rotate_x_y
+    
 
     def calc_p_matrix(self, mat_1, mat_2, L):
         """This function calculates the p_matrix given the two rotation matrices found in the calc_a_matrix function"""
         p_matrix = (1/(2*np.pi*(L**2)))*np.matmul(mat_1,mat_2)
         return p_matrix
-        
+    
 
     def calc_a_matrix(self):
         """This function finds the nxn a matrix given a list of nodes, control points, and correct functions that calculate xi,eta,phi,psi,li, and lj"""
@@ -100,17 +106,18 @@ class vortex_panels:
         a_vals = np.zeros((n, n))  # Initialize an empty array
         for i in range(0,n-1):
             for j in range(0,n-1):              
-                l_j = self.L[j]                
-                l_i = self.L[i]
+                l_j = self.L_vals[j]                
+                l_i = self.L_vals[i]
 
                 # define rotation matrix for x and y in the p_matrix calculation
-                rotate_x_y = np.array([[x[j+1]-x[j], -(y[j+1]-y[j])],[y[j+1]-y[j], x[j+1]-x[j]]])
+                # rotate_x_y = np.array([[x[j+1]-x[j], -(y[j+1]-y[j])],[y[j+1]-y[j], x[j+1]-x[j]]])
+                p_first = self.calc_p_first(x[j+1], x[j], y[j+1], y[j])
 
                 # define rotation matrix for xi and eta
-                rotate_xi_eta = self.calc_xi_eta_phi_psi(x_control[i], y_control[i], x[j+1], x[j], y[j+1], y[j], l_j)
+                p_second = self.calc_xi_eta_phi_psi(x_control[i], y_control[i], x[j+1], x[j], y[j+1], y[j], l_j)
 
                 # Calculate the P matrix at i, j
-                p_matrix = self.calc_p_matrix(rotate_x_y, rotate_xi_eta, l_j)
+                p_matrix = self.calc_p_matrix(p_first, p_second, l_j)
 
                 a_vals[i,j] = a_vals[i,j] + ((x[i+1]-x[i])*p_matrix[1,0]-(y[i+1]-y[i])*p_matrix[0,0])/l_i
                 a_vals[i,j+1] = a_vals[i,j+1] + ((x[i+1]-x[i])*p_matrix[1,1]-(y[i+1]-y[i])*p_matrix[0,1])/l_i    
@@ -128,7 +135,7 @@ class vortex_panels:
         for i in range(0,n-1):
             diff_x = x[i+1]-x[i]
             diff_y = y[i+1]-y[i]
-            l_val = self.L[i]
+            l_val = self.L_vals[i]
             B_val = ((diff_y*np.cos(self.alpha))-(diff_x*np.sin(self.alpha)))/l_val
             B_matrix[i] = B_val
         self.B_matrix = B_matrix
@@ -145,7 +152,7 @@ class vortex_panels:
         gammas = self.gammas
         vel_inf = self.vel_inf
         points_list = self.geometry
-        l_i = self.L
+        l_i = self.L_vals
         n = int(len(points_list))
         Coeff_L = 0.0
         for i in range(0, n-1):
@@ -158,7 +165,7 @@ class vortex_panels:
         """This function finds the moment coefficient calculated at the leading edge"""
         points_list = self.geometry
         gammas = self.gammas
-        l_i = self.L
+        l_i = self.L_vals
         n = int(len(points_list))
         x, y = points_list[:,0], points_list[:,1]
         Cm_le = 0
@@ -201,6 +208,6 @@ class vortex_panels:
 
 if __name__ == "__main__":
     NACA_object = vortex_panels("airfoils.json")
-    NACA_object.program(0)
-    NACA_object.program(1)
+    NACA_object.program(0) #### note to user: Place the name of the airfoil text file you want to evaluate in the json "airfoils" list and choose it using an integer here.
+    NACA_object.program(1) 
     NACA_object.program(2)
