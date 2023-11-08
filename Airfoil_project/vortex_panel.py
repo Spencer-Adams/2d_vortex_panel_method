@@ -77,10 +77,10 @@ class vortex_panels:
 
     def calc_xi_eta_phi_psi(self, control_x, control_y, point_x_2, point_x_1, point_y_2, point_y_1, L):
         """This function calculates the xi, eta, phi, and psi values given a list of nodes and control points"""
-        xi = (1/L)*((point_x_2-point_x_1)*(control_x-point_x_1)+(point_y_2-point_y_1)*(control_y-point_y_1)) # this is the dot product for solving for xi
-        eta = (1/L)*(-(point_y_2-point_y_1)*(control_x-point_x_1)+(point_x_2-point_x_1)*(control_y-point_y_1)) # this is the dot product for solving for eta
-        phi = np.arctan2(eta*L, eta**2+xi**2-xi*L)
-        psi = 0.5*np.log((xi**2+eta**2)/((xi-L)**2+eta**2))
+        xi = (1/L)*((point_x_2-point_x_1)*(control_x-point_x_1)+(point_y_2-point_y_1)*(control_y-point_y_1)) # this is the dot product for solving for xi, eq 1.6.20 Mechanics of Flight
+        eta = (1/L)*(-(point_y_2-point_y_1)*(control_x-point_x_1)+(point_x_2-point_x_1)*(control_y-point_y_1)) # this is the dot product for solving for eta, eq 1.6.20 Mechanics of Flight
+        phi = np.arctan2(eta*L, eta**2+xi**2-xi*L) # eq 1.6.21 Mechanics of Flight
+        psi = 0.5*np.log((xi**2+eta**2)/((xi-L)**2+eta**2)) # eq 1.6.22 Mechanics of Flight
         rotate_xi_eta = np.array([[(L-xi)*phi+(eta*psi), (xi*phi)-(eta*psi)], [(eta*phi)-((L-xi)*psi)-L, (-eta*phi)-(xi*psi)+L]])
         return rotate_xi_eta
     
@@ -93,7 +93,7 @@ class vortex_panels:
 
     def calc_p_matrix(self, mat_1, mat_2, L):
         """This function calculates the p_matrix given the two rotation matrices found in the calc_a_matrix function"""
-        p_matrix = (1/(2*np.pi*(L**2)))*np.matmul(mat_1,mat_2)
+        p_matrix = (1/(2*np.pi*(L**2)))*np.matmul(mat_1,mat_2) # eq 1.6.23 Mechanics of Flight
         return p_matrix
     
 
@@ -111,19 +111,18 @@ class vortex_panels:
                 l_i = self.L_vals[i]
 
                 # define rotation matrix for x and y in the p_matrix calculation
-                # rotate_x_y = np.array([[x[j+1]-x[j], -(y[j+1]-y[j])],[y[j+1]-y[j], x[j+1]-x[j]]])
                 p_first = self.calc_p_first(x[j+1], x[j], y[j+1], y[j])
 
                 # define rotation matrix for xi and eta
                 p_second = self.calc_xi_eta_phi_psi(x_control[i], y_control[i], x[j+1], x[j], y[j+1], y[j], l_j)
 
                 # Calculate the P matrix at i, j
-                p_matrix = self.calc_p_matrix(p_first, p_second, l_j)
+                p_matrix = self.calc_p_matrix(p_first, p_second, l_j) # eq 1.6.23 Mechanics of Flight
 
-                a_vals[i,j] = a_vals[i,j] + ((x[i+1]-x[i])*p_matrix[1,0]-(y[i+1]-y[i])*p_matrix[0,0])/l_i
-                a_vals[i,j+1] = a_vals[i,j+1] + ((x[i+1]-x[i])*p_matrix[1,1]-(y[i+1]-y[i])*p_matrix[0,1])/l_i    
-        a_vals[n-1,0] = 1.0
-        a_vals[n-1,n-1] = 1.0 
+                a_vals[i,j] = a_vals[i,j] + ((x[i+1]-x[i])*p_matrix[1,0]-(y[i+1]-y[i])*p_matrix[0,0])/l_i # eq 1.6.25 Mechanics of Flight
+                a_vals[i,j+1] = a_vals[i,j+1] + ((x[i+1]-x[i])*p_matrix[1,1]-(y[i+1]-y[i])*p_matrix[0,1])/l_i # eq 1.6.25 Mechanics of Flight   
+        a_vals[n-1,0] = 1.0 # eq 1.6.26 Mechanics of Flight
+        a_vals[n-1,n-1] = 1.0 # eq 1.6.27 Mechanics of Flight
         self.A_matrix = a_vals
    
 
@@ -144,7 +143,7 @@ class vortex_panels:
 
     def calc_gammas(self):
         """This function finds the gamma values given matrix_a, matrix_d and vel_inf"""
-        gammas = np.linalg.solve(self.A_matrix, self.vel_inf*self.B_matrix)
+        gammas = np.linalg.solve(self.A_matrix, self.vel_inf*self.B_matrix) # eq 1.6.28 Mechanics of Flight
         self.gammas = gammas
    
 
@@ -157,7 +156,7 @@ class vortex_panels:
         n = int(len(points_list))
         Coeff_L = 0.0
         for i in range(0, n-1):
-            Co_L = l_i[i]*((gammas[i]+gammas[i+1])/(vel_inf))
+            Co_L = l_i[i]*((gammas[i]+gammas[i+1])/(vel_inf)) # eq 1.6.32 Mechanics of Flight
             Coeff_L += Co_L
         self.Coeff_L = Coeff_L
    
@@ -175,13 +174,13 @@ class vortex_panels:
             sin_coeff = (2*y[i]*gammas[i]+y[i]*gammas[i+1]+y[i+1]*gammas[i]+2*y[i+1]*gammas[i+1])
             Cmle = l_i[i]*(cos_coeff*np.cos(self.alpha)+sin_coeff*np.sin(self.alpha))
             Cm_le = Cm_le + Cmle
-        Cm_le = (-1/3)*Cm_le/self.vel_inf
+        Cm_le = (-1/3)*Cm_le/self.vel_inf # eq 1.6.33 Mechanics of Flight
         self.Coeff_mle = Cm_le
    
 
     def calc_Cm_4(self):
         """This function calculates the coefficient of lift at the quarter chord"""
-        Cm_4 = self.Coeff_mle+ 0.25*self.Coeff_L*np.cos(self.alpha)
+        Cm_4 = self.Coeff_mle + 0.25*self.Coeff_L*np.cos(self.alpha) # eq 1.1.5 Mechanics of Flight
         self.Cm_4 = Cm_4
     
 
